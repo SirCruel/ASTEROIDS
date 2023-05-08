@@ -23,7 +23,7 @@ public class Rectangle {
         this.height = h;
     }
     public boolean overlaps (Rectangle other){
-        // left of other
+        // left of the other
         // right of the other
         // above the other
         // below the other
