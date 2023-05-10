@@ -7,6 +7,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.Random;
@@ -23,7 +25,7 @@ public class Asteroids extends Application {
             System.exit(0);
         }
     }
-
+        int score;
     @Override
     public void start(Stage mainStage) throws Exception {
         mainStage.setTitle("ASTEROIDS");
@@ -78,9 +80,19 @@ public class Asteroids extends Application {
         ArrayList<Sprite> laserList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidList = new ArrayList<Sprite>();
 
+        int numberOfAsteroids = 8;
 
-
-
+        for (int i = 0; i < numberOfAsteroids; i++) {
+            Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
+            double x = 500*Math.random()+300;
+            double y = 400*Math.random()+100;
+            asteroid.position.set(x,y);
+            double angle = 360*Math.random();
+            asteroid.velocity.setLength(Math.random()+100);
+            asteroid.velocity.setAngle(angle);
+            asteroidList.add(asteroid);
+        }
+        score = 0;
         AnimationTimer looper = new AnimationTimer()
         {
             public void handle (long nanotime){
@@ -112,31 +124,11 @@ public class Asteroids extends Application {
 
                 }
 
-                /*Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
-                Random random = new Random();
-                asteroid.position.set(0,0);
-                asteroid.velocity.setLength(50);
-                asteroid.velocity.setAngle(50);
-                asteroidList.add(asteroid);
-                */
-                int numberOfAsteroids = 4; // specify the number of asteroids you want to create
-                Random random = new Random();
-                Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
-
-                for (int i = 0; i < numberOfAsteroids; i++) {
-                    // set the position and velocity of the asteroid using random values
-                    asteroid.position.set(random.nextInt(800), random.nextInt(1000));
-                    asteroid.velocity.setLength(random.nextInt(50));
-                    asteroid.velocity.setAngle(random.nextInt(360));
-                    asteroidList.add(asteroid);
-                }
-
-                for (int i = 0; i < asteroidList.size(); i++) {
-                    asteroid = asteroidList.get(i);
-                    asteroid.update(1 / 60.0);
-                    asteroid.render(context);
-                }
                 spaceship.update(1/60.0);
+                for(Sprite asteroid : asteroidList)
+                    asteroid.update(1/60.0);
+
+                //laser remove after 2 seconds
                 for(int n=0; n< laserList.size();n++)
                 {
                     Sprite laser = laserList.get(n);
@@ -144,27 +136,46 @@ public class Asteroids extends Application {
                     if(laser.elapsedTime>2)
                         laserList.remove(n);
                 }
-                for (int i = 0; i < laserList.size(); i++) {
-                    Sprite laser = laserList.get(i);
-                    for (int j = 0; j < asteroidList.size(); j++) {
-                        asteroid = asteroidList.get(j);
-                        if (laser.position.equals(asteroid.position)) {
-                            asteroidList.remove(j);
-                            break;
+
+                //remove if laser and asteroid overlaps
+                for(int laserNum=0;laserNum<laserList.size();laserNum++)
+                {
+                    Sprite laser = laserList.get(laserNum);
+                    for(int asteroidNum=0; asteroidNum<asteroidList.size();asteroidNum++){
+                        Sprite asteroid = asteroidList.get(asteroidNum);
+                        if(laser.overlaps(asteroid)){
+                            laserList.remove(laserNum);
+                            asteroidList.remove(asteroidNum);
+                            score+=100;
+
                         }
                     }
                 }
+
+                //game over if asteroid overlaps spaceship
+
+
 
                 background.render(context);
                 spaceship.render(context);
 
                 for(Sprite laser : laserList)
                     laser.render(context);
+                for(Sprite asteroid : asteroidList)
+                    asteroid.render(context);
 
+                context.setFill(Color.WHITESMOKE);
+                context.setStroke(Color.GREEN);
+                context.setFont(new Font("Arial Black",30));
+                context.setLineWidth(3);
+                String text="SCORE: "+score;
+                int textX=700;
+                int textY=30;
+                context.fillText(text,textX,textY);
+                context.strokeText(text,textX,textY);
             }
         };
         looper.start();
-
 
         mainStage.show();
     }
