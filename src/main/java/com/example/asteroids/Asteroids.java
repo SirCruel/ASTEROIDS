@@ -2,16 +2,20 @@ package com.example.asteroids;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Asteroids extends Application {
     public static void main (String [] args){
@@ -26,6 +30,10 @@ public class Asteroids extends Application {
         }
     }
         int score;
+    Button yes = new Button("YES!");
+    Button no = new Button("NO!");
+
+    boolean gameOver = false;
     @Override
     public void start(Stage mainStage) throws Exception {
         mainStage.setTitle("ASTEROIDS");
@@ -56,8 +64,6 @@ public class Asteroids extends Application {
                 }
         );
 
-
-
         mainScene.setOnKeyReleased(
                 (KeyEvent event)->{
                     String keyName = event.getCode().toString();
@@ -82,6 +88,8 @@ public class Asteroids extends Application {
 
         int numberOfAsteroids = 8;
 
+
+
         for (int i = 0; i < numberOfAsteroids; i++) {
             Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
             double x = 500*Math.random()+300;
@@ -95,6 +103,7 @@ public class Asteroids extends Application {
         score = 0;
         AnimationTimer looper = new AnimationTimer()
         {
+
             public void handle (long nanotime){
                 //process user input
                 if(keyPressedList.contains("LEFT"))
@@ -119,7 +128,7 @@ public class Asteroids extends Application {
                     laser.velocity.setAngle(spaceship.rotation);
                     laserList.add(laser);
                     laser.rotation=spaceship.rotation;
-
+                    //laserList.size()=numberOfAsteroids*3;
                     keyJustPressedList.clear();
 
                 }
@@ -137,7 +146,7 @@ public class Asteroids extends Application {
                         laserList.remove(n);
                 }
 
-                //remove if laser and asteroid overlaps
+                //remove laser and asteroid if overlaps
                 for(int laserNum=0;laserNum<laserList.size();laserNum++)
                 {
                     Sprite laser = laserList.get(laserNum);
@@ -147,16 +156,55 @@ public class Asteroids extends Application {
                             laserList.remove(laserNum);
                             asteroidList.remove(asteroidNum);
                             score+=100;
-
                         }
                     }
                 }
+                //ammo laser 3 * asteroids (8 asteroids ; 24 lasershots)
+
+
+
+                //spawn another wave of asteroids (asteroidNum ++)
+
+
 
                 //game over if asteroid overlaps spaceship
-
-
+                for (int asteroidHit=0;asteroidHit<asteroidList.size();asteroidHit++)
+                {
+                    Sprite asteroid = asteroidList.get(asteroidHit);
+                    if (spaceship.overlaps(asteroid)){
+                        gameOver = true;
+                    }
+                }
 
                 background.render(context);
+
+                if (gameOver) {
+                    context.setFill(Color.RED);
+                    context.setStroke(Color.DARKRED);
+                    context.setFont(new Font("Arial Black",30));
+                    context.setLineWidth(3);
+                    String text="Game Over... \n SCORE: "+score+ "\n play again?";
+                    int textX=400;
+                    int textY=100;
+                    context.fillText(text,textX,textY);
+                    context.strokeText(text,textX,textY);
+                    spaceship.position.set(200,400);
+                    spaceship.velocity.setLength(0);
+                    spaceship.velocity.setAngle(0);
+
+
+                    //insert buttons!!!
+                    no.setOnAction(actionEvent -> System.exit(0));
+
+                    //insert yes action!!!
+                    yes.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent actionEvent) {
+
+                        }
+                    });
+                }
+
                 spaceship.render(context);
 
                 for(Sprite laser : laserList)

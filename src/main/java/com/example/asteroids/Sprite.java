@@ -1,8 +1,9 @@
 package com.example.asteroids;
 
-import com.example.asteroids.Rectangle;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class Sprite {
     public myVector position;
@@ -72,5 +73,4 @@ public class Sprite {
 
         context.restore();
     }
-
 }
