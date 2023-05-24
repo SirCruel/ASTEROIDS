@@ -4,6 +4,8 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,8 +14,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 
@@ -35,13 +39,13 @@ public class Asteroids extends Application {
 
     boolean gameOver = false;
     @Override
-    public void start(Stage mainStage) throws Exception {
-        mainStage.setTitle("ASTEROIDS");
-        BorderPane root=new BorderPane();
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("ASTEROIDS");
+        BorderPane root = new BorderPane();
         Scene mainScene = new Scene(root);
-        mainStage.setScene(mainScene);
+        primaryStage.setScene(mainScene);
 
-        Canvas canvas= new Canvas(1000,800);
+        Canvas canvas = new Canvas(1000, 900);
         GraphicsContext context = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
@@ -86,20 +90,8 @@ public class Asteroids extends Application {
         ArrayList<Sprite> laserList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidList = new ArrayList<Sprite>();
 
-        int numberOfAsteroids = 8;
+        final int[] numberOfAsteroids = {6};
 
-
-
-        for (int i = 0; i < numberOfAsteroids; i++) {
-            Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
-            double x = 500*Math.random()+300;
-            double y = 400*Math.random()+100;
-            asteroid.position.set(x,y);
-            double angle = 360*Math.random();
-            asteroid.velocity.setLength(Math.random()+100);
-            asteroid.velocity.setAngle(angle);
-            asteroidList.add(asteroid);
-        }
         score = 0;
         AnimationTimer looper = new AnimationTimer()
         {
@@ -164,7 +156,20 @@ public class Asteroids extends Application {
 
 
                 //spawn another wave of asteroids (asteroidNum ++)
-
+                if (asteroidList.isEmpty()) {
+                    numberOfAsteroids[0]++; // increase the number of asteroids
+                    for (int i = 0; i < numberOfAsteroids[0]; i++) {
+                        // spawn new asteroids as before
+                        Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
+                        double x = 500 * Math.random() + 300;
+                        double y = 400 * Math.random() + 100;
+                        asteroid.position.set(x, y);
+                        double angle = 360 * Math.random();
+                        asteroid.velocity.setLength(Math.random() + 100);
+                        asteroid.velocity.setAngle(angle);
+                        asteroidList.add(asteroid);
+                    }
+                }
 
 
                 //game over if asteroid overlaps spaceship
@@ -179,30 +184,36 @@ public class Asteroids extends Application {
                 background.render(context);
 
                 if (gameOver) {
-                    context.setFill(Color.RED);
-                    context.setStroke(Color.DARKRED);
-                    context.setFont(new Font("Arial Black",30));
-                    context.setLineWidth(3);
-                    String text="Game Over... \n SCORE: "+score+ "\n play again?";
-                    int textX=400;
-                    int textY=100;
-                    context.fillText(text,textX,textY);
-                    context.strokeText(text,textX,textY);
+
+                    Text gameOverText = new Text("Game Over...\nSCORE: " + score + "\nPlay again?");
+                    gameOverText.setFont(Font.font("Arial Black", 30));
+
+                    Font buttonFont = Font.font("Arial", 30);
+                    yes.setFont(buttonFont);
+                    no.setFont(buttonFont);
+
+                    VBox vbox = new VBox(20);
+                    vbox.setAlignment(Pos.CENTER);
+                    vbox.setPadding(new Insets(20));
+                    vbox.getChildren().addAll(gameOverText, yes, no);
+
+                    root.setCenter(vbox);
+                    vbox.setStyle("-fx-background-color: red; -fx-border-color: darkred;");
+
+
+
                     spaceship.position.set(200,400);
                     spaceship.velocity.setLength(0);
                     spaceship.velocity.setAngle(0);
 
 
-                    //insert buttons!!!
-                    no.setOnAction(actionEvent -> System.exit(0));
-
-                    //insert yes action!!!
-                    yes.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent) {
-
-                        }
+                    yes.setOnAction(actionEvent -> {
+                        primaryStage.close(); // Schließe das aktuelle Fenster
+                        startNewGame(); // Starte ein neues Spiel
                     });
+                    no.setOnAction(actionEvent -> primaryStage.close()); // Beende das Spiel, wenn "NO!" geklickt wird
+                    primaryStage.setOnCloseRequest(windowEvent -> System.exit(0)); // Beende das Spiel, wenn das Fenster geschlossen wird
+
                 }
 
                 spaceship.render(context);
@@ -225,6 +236,11 @@ public class Asteroids extends Application {
         };
         looper.start();
 
-        mainStage.show();
+        primaryStage.show();
+    }
+    private void startNewGame() {
+        Stage newStage = new Stage(); // Erstelle ein neues Stage-Objekt für das neue Spiel
+        Asteroids newGame = new Asteroids(); // Erstelle eine neue Instanz der Asteroids-Klasse
+        newGame.start(newStage); // Starte das neue Spiel mit dem neuen Stage-Objekt
     }
 }
