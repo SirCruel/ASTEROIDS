@@ -29,9 +29,14 @@ public class Asteroids extends Application {
             System.exit(0);
         }
     }
-        int score;
+    int score;
+    boolean isInvincible = false;
+    long invincibleStartTime=0;
     Button yes = new Button("YES!");
     Button no = new Button("NO!");
+    int numberOfAsteroids;
+    int maxLaserShots = numberOfAsteroids * 3;
+    int remainingLaserShots = maxLaserShots; 
 
     boolean gameOver = false;
     @Override
@@ -109,12 +114,13 @@ public class Asteroids extends Application {
                     spaceship.velocity.setLength(0);
                 }
 
-                if(keyJustPressedList.contains("F")) {
+                if(keyJustPressedList.contains("F")&& remainingLaserShots > 0) {
                     Sprite laser = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\laser.png");
                     laser.position.set(spaceship.position.x,spaceship.position.y);
                     laser.velocity.setLength(400);
                     laser.velocity.setAngle(spaceship.rotation);
                     laserList.add(laser);
+                    remainingLaserShots--;
                     laser.rotation=spaceship.rotation;
                     //laserList.size()=numberOfAsteroids*3;
                     keyJustPressedList.clear();
@@ -153,7 +159,9 @@ public class Asteroids extends Application {
 
                 //spawn another wave of asteroids (asteroidNum ++)
                 if (asteroidList.isEmpty()) {
-                    numberOfAsteroids[0]++; // increase the number of asteroids
+                    numberOfAsteroids[0]++;// increase the number of asteroids
+                    maxLaserShots = numberOfAsteroids[0] * 3; // Aktualisiere die maximale Anzahl der Laserschüsse
+                    remainingLaserShots = maxLaserShots;
                     for (int i = 0; i < numberOfAsteroids[0]; i++) {
                         // spawn new asteroids as before
                         Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
@@ -164,6 +172,8 @@ public class Asteroids extends Application {
                         asteroid.velocity.setLength(Math.random() + 100);
                         asteroid.velocity.setAngle(angle);
                         asteroidList.add(asteroid);
+                        isInvincible = true;
+                        invincibleStartTime = System.currentTimeMillis();
                     }
                 }
 
@@ -172,7 +182,7 @@ public class Asteroids extends Application {
                 for (int asteroidHit=0;asteroidHit<asteroidList.size();asteroidHit++)
                 {
                     Sprite asteroid = asteroidList.get(asteroidHit);
-                    if (spaceship.overlaps(asteroid)){
+                    if (!isInvincible() && spaceship.overlaps(asteroid)) {
                         gameOver = true;
                     }
                 }
@@ -223,8 +233,8 @@ public class Asteroids extends Application {
                 context.setStroke(Color.GREEN);
                 context.setFont(new Font("Arial Black",30));
                 context.setLineWidth(3);
-                String text="SCORE: "+score;
-                int textX=700;
+                String text = "SCORE: " + score + "   LASERS: " + remainingLaserShots;
+                int textX=500;
                 int textY=30;
                 context.fillText(text,textX,textY);
                 context.strokeText(text,textX,textY);
@@ -233,6 +243,9 @@ public class Asteroids extends Application {
         looper.start();
 
         primaryStage.show();
+    }
+    private boolean isInvincible() {
+        return isInvincible && (System.currentTimeMillis() - invincibleStartTime) < 2000;
     }
     private void startNewGame() {
         Stage newStage = new Stage(); // Erstelle ein neues Stage-Objekt für das neue Spiel
