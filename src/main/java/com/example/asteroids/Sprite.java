@@ -12,12 +12,13 @@ public class Sprite {
     public Rectangle boundary;
     public Image image;
     public double elapsedTime;
+    public double rotationSpeed;
     private double width;
     private double height;
 
     public Sprite(){
         this.position = new myVector();
-        this.velocity = new myVector();
+        this.velocity = new myVector(1,1);
         this.rotation = 0;
         this.boundary = new Rectangle();
         this.elapsedTime=0;

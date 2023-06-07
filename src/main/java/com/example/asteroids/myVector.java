@@ -57,4 +57,5 @@ public class myVector
         this.x = L * Math.cos(angleRadians);
         this.y = L * Math.sin(angleRadians);
     }
+
 }
