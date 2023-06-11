@@ -11,11 +11,16 @@ import javafx.scene.control.Button;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.media.Media;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
 import java.util.ArrayList;
+import java.lang.Thread;
 
 public class Asteroids extends Application {
     public static void main (String [] args){
@@ -38,14 +43,30 @@ public class Asteroids extends Application {
     double maxLaserShots = numberOfAsteroids * 2;
     double remainingLaserShots = maxLaserShots;
     int wave = 0;
-
+    boolean isGameOverSoundPlayed = false;
+    boolean isGamerRestartSoundPlayed = false;
     boolean gameOver = false;
+    private MediaPlayer engineMediaPlayer;
+
+    private MediaPlayer laserMediaPlayer;
+    private MediaPlayer collisionMediaPlayer;
+    private MediaPlayer gameOverMediaPlayer;
+    private MediaPlayer restartMediaPlayer;
+    private MediaPlayer exitMediaPlayer;
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("ASTEROIDS");
         BorderPane root = new BorderPane();
         Scene mainScene = new Scene(root);
         primaryStage.setScene(mainScene);
+
+        engineMediaPlayer = createMediaPlayer("random.wav");
+        engineMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        laserMediaPlayer = createMediaPlayer("laserSound.mp3");
+        collisionMediaPlayer = createMediaPlayer("explosion.wav");
+        gameOverMediaPlayer = createMediaPlayer("gameOverSound.wav");
+        restartMediaPlayer = createMediaPlayer("ah shit here we go again.wav");
+        exitMediaPlayer = createMediaPlayer("Was zitterst denn so..wav");
 
         Canvas canvas = new Canvas(1000, 900);
         GraphicsContext context = canvas.getGraphicsContext2D();
@@ -109,11 +130,12 @@ public class Asteroids extends Application {
                 if(keyPressedList.contains("UP")) {
                     spaceship.velocity.setLength(180);
                     spaceship.velocity.setAngle(spaceship.rotation);
-                    engineSound();
+                    engineMediaPlayer.play();
                 }
                 else //not pressing UP
                 {
                     spaceship.velocity.setLength(0);
+                    engineMediaPlayer.stop();
                 }
 
                 if(keyJustPressedList.contains("F")&& remainingLaserShots > 0) {
@@ -124,8 +146,10 @@ public class Asteroids extends Application {
                     laserList.add(laser);
                     remainingLaserShots--;
                     laser.rotation=spaceship.rotation;
+                    laserMediaPlayer.seek(Duration.ZERO);
+                    laserMediaPlayer.play();
                     keyJustPressedList.clear();
-                    laserSound();
+
                 }
 
                 spaceship.update(1/60.0);
@@ -162,7 +186,8 @@ public class Asteroids extends Application {
                             */
                             laserList.remove(laserNum);
                             asteroidList.remove(asteroidNum);
-                            collisionSound();
+                            collisionMediaPlayer.seek(Duration.ZERO);
+                            collisionMediaPlayer.play();
                             score+=100;
                         }
                     }
@@ -178,14 +203,16 @@ public class Asteroids extends Application {
                         // spawn new asteroids
                         Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
                         double x , y ;
-                        double spacing = 300;
+                        double spacing = 200;
 
-                        do {x = 500 * Math.random() + 300;
-                            y = 400 * Math.random() + 100;}
+                        do {
+                            x = 500 * Math.random() + 300;
+                            y = 400 * Math.random() + 100;
+                        }
+                        while (!((x < spaceship.position.x - spacing || x > spaceship.position.x + spacing) &&
+                                (y < spaceship.position.y - spacing || y > spaceship.position.y + spacing))
+                        );
 
-                            while (!(x < spaceship.position.x - spacing || x > spaceship.position.x + spacing &&
-                                y < spaceship.position.y - spacing || y > spaceship.position.y + spacing)
-                            );
 
                         asteroid.position.set(x, y);
 
@@ -216,7 +243,10 @@ public class Asteroids extends Application {
                 background.render(context);
 
                 if (gameOver) {
-                    gameOverSound();
+                    if (!isGameOverSoundPlayed) {
+                        gameOverMediaPlayer.play();
+                        isGameOverSoundPlayed = true;
+                    }
                     Text gameOverText = new Text("Game Over...\nSCORE: " + score + "\nPlay again?");
                     gameOverText.setFont(Font.font("Arial Black", 30));
 
@@ -235,12 +265,29 @@ public class Asteroids extends Application {
 
                     yes.setOnAction(actionEvent -> {
                         primaryStage.close();
-                        restartSound();
+                        restartMediaPlayer.play();
                         startNewGame();
                     });
-                    no.setOnAction(actionEvent -> primaryStage.close());
-                    primaryStage.setOnCloseRequest(windowEvent -> System.exit(0));
-                    exitSound();
+                    if(!isGamerRestartSoundPlayed) {
+                        isGamerRestartSoundPlayed = true;
+
+
+                        no.setOnAction(actionEvent -> {
+                            exitMediaPlayer.setOnEndOfMedia(() -> {
+                                exitMediaPlayer.stop();
+                                primaryStage.close();
+                            });
+                            exitMediaPlayer.play();
+
+                            primaryStage.setOnCloseRequest(windowEvent -> {
+                                exitMediaPlayer.stop();
+                            });
+                        });
+                    }
+                        primaryStage.setOnCloseRequest(windowEvent -> {
+
+                        System.exit(0);
+                    });
                 }
 
                 spaceship.render(context);
@@ -270,24 +317,11 @@ public class Asteroids extends Application {
     private boolean isInvincible() {
         return isInvincible && (System.currentTimeMillis() - invincibleStartTime) < 2000;
     }
-    public void engineSound(){
-
+    private MediaPlayer createMediaPlayer(String fileName) {
+        Media sound = new Media(getClass().getResource(fileName).toExternalForm());
+        return new MediaPlayer(sound);
     }
-    public void laserSound(){
 
-    }
-    public void collisionSound(){
-
-    }
-    public void gameOverSound(){
-
-    }
-    public void restartSound(){
-
-    }
-    public void exitSound(){
-
-    }
     private void startNewGame() {
         Stage newStage = new Stage();
         Asteroids newGame = new Asteroids();
