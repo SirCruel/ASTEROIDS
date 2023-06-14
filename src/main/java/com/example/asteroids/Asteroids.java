@@ -106,6 +106,9 @@ public class Asteroids extends Application {
         spaceship.position.set(100,400);
         spaceship.render(context);
 
+        //powerup
+        Sprite powerup = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\powerup.png");
+
         ArrayList<Sprite> laserList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidsplitList = new ArrayList<Sprite>();
@@ -237,7 +240,7 @@ public class Asteroids extends Application {
                         // spawn new asteroids
                         Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
                         double x , y ;
-                        //create safeplace for spawn
+                        //create safeplace for asteroidspawn
                         double spacing = 200;
                         do {
                             x = 500 * Math.random() + 300;
@@ -258,9 +261,6 @@ public class Asteroids extends Application {
 
                         asteroidList.add(asteroid);
 
-
-                        isInvincible = true;
-                        invincibleStartTime = System.currentTimeMillis();
                     }
                 }
 
@@ -269,7 +269,7 @@ public class Asteroids extends Application {
                 for (int asteroidHit=0;asteroidHit<asteroidList.size();asteroidHit++)
                 {
                     Sprite asteroid = asteroidList.get(asteroidHit);
-                    if (!isInvincible() && spaceship.overlaps(asteroid)) {
+                    if (spaceship.overlaps(asteroid)) {
                         gameOver = true;
                     }
                 }
@@ -341,6 +341,9 @@ public class Asteroids extends Application {
                         gameOver = true;
                     }
                 }
+                if (wave%3==0){
+                    powerUp();
+                }
 
 
 
@@ -371,5 +374,8 @@ public class Asteroids extends Application {
         Stage newStage = new Stage();
         Asteroids newGame = new Asteroids();
         newGame.start(newStage);
+    }
+    private void powerUp(){
+
     }
 }
