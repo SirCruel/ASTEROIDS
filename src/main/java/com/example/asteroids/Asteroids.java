@@ -20,7 +20,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.lang.Thread;
 
 public class Asteroids extends Application {
     public static void main (String [] args){
@@ -39,15 +38,11 @@ public class Asteroids extends Application {
     long invincibleStartTime=0;
     Button yes = new Button("YES!");
     Button no = new Button("NO!");
-    int numberOfAsteroids;
-    double maxLaserShots = numberOfAsteroids * 2;
-    double remainingLaserShots = maxLaserShots;
     int wave = 0;
     boolean isGameOverSoundPlayed = false;
     boolean isGamerRestartSoundPlayed = false;
     boolean gameOver = false;
     private MediaPlayer engineMediaPlayer;
-
     private MediaPlayer laserMediaPlayer;
     private MediaPlayer collisionMediaPlayer;
     private MediaPlayer gameOverMediaPlayer;
@@ -59,7 +54,7 @@ public class Asteroids extends Application {
         BorderPane root = new BorderPane();
         Scene mainScene = new Scene(root);
         primaryStage.setScene(mainScene);
-
+        // insert sounds
         engineMediaPlayer = createMediaPlayer("random.wav");
         engineMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         laserMediaPlayer = createMediaPlayer("laserSound.mp3");
@@ -67,7 +62,7 @@ public class Asteroids extends Application {
         gameOverMediaPlayer = createMediaPlayer("gameOverSound.wav");
         restartMediaPlayer = createMediaPlayer("ah shit here we go again.wav");
         exitMediaPlayer = createMediaPlayer("Was zitterst denn so..wav");
-
+        // create canvas
         Canvas canvas = new Canvas(1000, 900);
         GraphicsContext context = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
@@ -77,6 +72,7 @@ public class Asteroids extends Application {
         //discrete input
         ArrayList<String> keyJustPressedList = new ArrayList<>();
 
+        //action on keys
         mainScene.setOnKeyPressed(
                 (KeyEvent event)->
                 {
@@ -100,21 +96,23 @@ public class Asteroids extends Application {
                     }
                 }
         );
-
+        //background
         Sprite background = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\background.jpg");
         background.position.set(500,400);
         background.render(context);
 
-
+        //spaceship
         Sprite spaceship = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\Spaceship.png");
         spaceship.position.set(100,400);
         spaceship.render(context);
 
         ArrayList<Sprite> laserList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidList = new ArrayList<Sprite>();
+        ArrayList<Sprite> asteroidsplitList = new ArrayList<Sprite>();
 
-        final int[] numberOfAsteroids = {5};
-
+        final int[] numberOfAsteroids = {6};
+        final double[] maxLaserShots = {numberOfAsteroids[0] * 4};
+        final double[] remainingLaserShots = {maxLaserShots[0]};
         score = 0;
         AnimationTimer looper = new AnimationTimer()
         {
@@ -138,13 +136,13 @@ public class Asteroids extends Application {
                     engineMediaPlayer.stop();
                 }
 
-                if(keyJustPressedList.contains("F")&& remainingLaserShots > 0) {
+                if(keyJustPressedList.contains("F")&& remainingLaserShots[0] > 0) {
                     Sprite laser = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\laser.png");
                     laser.position.set(spaceship.position.x,spaceship.position.y);
                     laser.velocity.setLength(420);
                     laser.velocity.setAngle(spaceship.rotation);
                     laserList.add(laser);
-                    remainingLaserShots--;
+                    remainingLaserShots[0]--;
                     laser.rotation=spaceship.rotation;
                     laserMediaPlayer.seek(Duration.ZERO);
                     laserMediaPlayer.play();
@@ -165,46 +163,82 @@ public class Asteroids extends Application {
                         laserList.remove(n);
                 }
 
-                //remove laser and asteroid if overlaps
-                for(int laserNum=0;laserNum<laserList.size();laserNum++)
-                {
+                // check collsision laser : asteroids
+                for (int laserNum = 0; laserNum < laserList.size(); laserNum++) {
                     Sprite laser = laserList.get(laserNum);
-                    for(int asteroidNum=0; asteroidNum<asteroidList.size();asteroidNum++){
+                    boolean laserOverlaps = false;
+
+                    for (int asteroidNum = 0; asteroidNum < asteroidList.size(); asteroidNum++) {
                         Sprite asteroid = asteroidList.get(asteroidNum);
-                        if(laser.overlaps(asteroid)){
-                            /*
-                            Sprite asteroidsplit = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rockpiece.png");
-                            Sprite x= asteroidList.get((int) asteroid.position.x);
-                            Sprite y= asteroidList.get((int) asteroid.position.y);
-                            asteroidsplit.position.set(x,y);
-                            double angle = 360 * Math.random();
-                            asteroidsplit.velocity.setLength(Math.random() + 120);
-                            asteroidsplit.velocity.setAngle(angle);
-                            asteroidsplit.rotationSpeed = Math.random()* 2 - 1;
-                            asteroidsplit.asteroidSpeed = Math.random()* 150 - 100;
-                            asteroidList.add(asteroidsplit);
-                            */
-                            laserList.remove(laserNum);
+                        if (laser.overlaps(asteroid)) {
+                            // save positions
+                            double collisionX = asteroid.position.x;
+                            double collisionY = asteroid.position.y;
                             asteroidList.remove(asteroidNum);
                             collisionMediaPlayer.seek(Duration.ZERO);
                             collisionMediaPlayer.play();
-                            score+=100;
+                            score += 100;
+                            // create asteroidsplits
+                            for (int asteroidsplitNum = 0; asteroidsplitNum < 3; asteroidsplitNum++) {
+                                Sprite asteroidSplit = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rockpiece.png");
+                                asteroidSplit.position.set(collisionX, collisionY);
+                                asteroidSplit.velocity.setLength(Math.random() + 100);
+                                double angle = 360 * Math.random();
+                                asteroidSplit.velocity.setAngle(angle);
+                                asteroidSplit.rotationSpeed = Math.random() * 2 - 1;
+                                asteroidSplit.velocity.multiply(Math.random() + 0.5);
+                                asteroidsplitList.add(asteroidSplit);
+                            }
+                            laserOverlaps = true;
+                            break;
                         }
                     }
+                    // remove if overlaps with asteroid
+                    if (laserOverlaps) {
+                        laserList.remove(laserNum);
+                        laserNum--;
+                    }
                 }
+
+                // remove laser and asteroid split if overlaps
+                for (int laserNum = 0; laserNum < laserList.size(); laserNum++) {
+                    Sprite laser = laserList.get(laserNum);
+                    boolean laserOverlaps = false;
+
+                    for (int asteroidsplitNum = 0; asteroidsplitNum < asteroidsplitList.size(); asteroidsplitNum++) {
+                        Sprite asteroidSplit = asteroidsplitList.get(asteroidsplitNum);
+                        if (laser.overlaps(asteroidSplit)) {
+                            laserOverlaps = true;
+                            asteroidsplitList.remove(asteroidsplitNum);
+                            collisionMediaPlayer.seek(Duration.ZERO);
+                            collisionMediaPlayer.play();
+                            score += 150;
+                            break;
+                        }
+                    }
+                    // remove if overlaps with asteroidsplits
+                    if (laserOverlaps) {
+                        laserList.remove(laserNum);
+                        laserNum--;
+                    }
+                }
+
+
+
+
 
                 //spawn another wave of asteroids (asteroidNum ++)
                 if (asteroidList.isEmpty()) {
                     numberOfAsteroids[0]++;
-                    maxLaserShots = numberOfAsteroids[0] * 3.5;
-                    remainingLaserShots = maxLaserShots;
+                    maxLaserShots[0] = numberOfAsteroids[0] * 4;
+                    remainingLaserShots[0] = maxLaserShots[0];
                     wave ++;
                     for (int i = 0; i < numberOfAsteroids[0]; i++) {
                         // spawn new asteroids
                         Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
                         double x , y ;
+                        //create safeplace for spawn
                         double spacing = 200;
-
                         do {
                             x = 500 * Math.random() + 300;
                             y = 400 * Math.random() + 100;
@@ -298,12 +332,23 @@ public class Asteroids extends Application {
                     asteroid.render(context);
                     asteroid.rotation += asteroid.rotationSpeed;
                 }
+                for (Sprite asteroidsplit : asteroidsplitList) {
+                    asteroidsplit.update(1 / 60.0);
+                    asteroidsplit.render(context);
+                    asteroidsplit.rotation += asteroidsplit.rotationSpeed;
+
+                    if (spaceship.overlaps(asteroidsplit)) {
+                        gameOver = true;
+                    }
+                }
+
+
 
                 context.setFill(Color.WHITESMOKE);
                 context.setStroke(Color.GREEN);
                 context.setFont(new Font("Arial Black",30));
                 context.setLineWidth(3);
-                String text = "WAVE: "+ wave +"     LASERS: " + Math.round(remainingLaserShots)+"     SCORE: " + score ;
+                String text = "WAVE: "+ wave +"     LASERS: " + Math.round(remainingLaserShots[0])+"     SCORE: " + score ;
                 int textX=200;
                 int textY=30;
                 context.fillText(text,textX,textY);
