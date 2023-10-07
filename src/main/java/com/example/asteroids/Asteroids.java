@@ -97,17 +97,17 @@ public class Asteroids extends Application {
                 }
         );
         //background
-        Sprite background = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\background.jpg");
+        Sprite background = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\background.jpg");
         background.position.set(500,400);
         background.render(context);
 
         //spaceship
-        Sprite spaceship = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\Spaceship.png");
+        Sprite spaceship = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\Spaceship.png");
         spaceship.position.set(100,400);
         spaceship.render(context);
 
         //powerup
-        Sprite powerup = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\powerup.png");
+        Sprite powerup = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\powerup.png");
 
         ArrayList<Sprite> laserList = new ArrayList<Sprite>();
         ArrayList<Sprite> asteroidList = new ArrayList<Sprite>();
@@ -140,7 +140,7 @@ public class Asteroids extends Application {
                 }
 
                 if(keyJustPressedList.contains("F")&& remainingLaserShots[0] > 0) {
-                    Sprite laser = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\laser.png");
+                    Sprite laser = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\laser.png");
                     laser.position.set(spaceship.position.x,spaceship.position.y);
                     laser.velocity.setLength(420);
                     laser.velocity.setAngle(spaceship.rotation);
@@ -183,7 +183,7 @@ public class Asteroids extends Application {
                             score += 100;
                             // create asteroidsplits
                             for (int asteroidsplitNum = 0; asteroidsplitNum < 3; asteroidsplitNum++) {
-                                Sprite asteroidSplit = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rockpiece.png");
+                                Sprite asteroidSplit = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\rockpiece.png");
                                 asteroidSplit.position.set(collisionX, collisionY);
                                 asteroidSplit.velocity.setLength(Math.random() + 100);
                                 double angle = 360 * Math.random();
@@ -238,7 +238,7 @@ public class Asteroids extends Application {
                     wave ++;
                     for (int i = 0; i < numberOfAsteroids[0]; i++) {
                         // spawn new asteroids
-                        Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\2. Semester\\Algorithmen und Datenstrukturen\\Asteroids\\src\\rock.png");
+                        Sprite asteroid = new Sprite("C:\\Users\\Soner\\Desktop\\Asteroids\\src\\rock.png");
                         double x , y ;
                         //create safeplace for asteroidspawn
                         double spacing = 200;
